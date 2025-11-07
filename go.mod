@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/gin-gonic/gin v1.10.0
-	github.com/twilio/twilio-go v1.23.6
+	github.com/twilio/twilio-go v1.23.8
 )
 
 require (

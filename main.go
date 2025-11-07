@@ -170,11 +170,13 @@ func ospladConfirmacion(c *gin.Context) {
 
 func main() {
 	loadEnv()
-
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
+	r.SetTrustedProxies([]string{"127.0.0.1", "proxy_ip"})
 	r.POST("/notification-medication", sendWhatsAppMessage)
 	r.POST("/notification-approved", sendNotificationApproved)
 	r.POST("/general-message", generalMessage)
 	r.POST("/osplad-confirmacion", ospladConfirmacion)
 	r.Run(":8081")
 }
+
