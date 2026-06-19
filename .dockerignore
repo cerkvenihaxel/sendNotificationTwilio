@@ -1,0 +1,29 @@
+# Control de versiones
+.git
+.gitignore
+.gitattributes
+
+# IDE / editor
+.idea
+.vscode
+*.swp
+.DS_Store
+
+# Entorno local (NO debe ir dentro de la imagen)
+.env
+.env.*
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Binarios compilados localmente
+/notifications
+/sendNotification
+*.exe
+*.test
+*.out
+
+# Logs
+*.log

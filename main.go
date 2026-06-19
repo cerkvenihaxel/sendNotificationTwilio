@@ -128,6 +128,46 @@ func generalMessage(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Mensaje enviado correctamente"})
 }
 
+// ospladConfirmacion envía el aviso de confirmación de retiro (flujo OSPLAD) usando
+// el template aprobado en TWILIO_CONTENT_SID_OSPLAD_CONFIRM (2 variables: {{1}} nombre,
+// {{2}} listado de medicación). El cuerpo con saltos de línea vive en el template.
+func ospladConfirmacion(c *gin.Context) {
+	var request struct {
+		PhoneNumber      string `json:"phone"`
+		MessageVariables string `json:"message_vars"`
+	}
+
+	if err := c.BindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
+		return
+	}
+
+	accountSid := os.Getenv("TWILIO_ACCOUNT_SID")
+	authToken := os.Getenv("TWILIO_AUTH_TOKEN")
+	fromNumber := os.Getenv("TWILIO_FROM_NUMBER")
+	contentSid := os.Getenv("TWILIO_CONTENT_SID_OSPLAD_CONFIRM")
+
+	client := twilio.NewRestClientWithParams(twilio.ClientParams{
+		Username: accountSid,
+		Password: authToken,
+	})
+
+	params := &api.CreateMessageParams{}
+	params.SetTo("whatsapp:" + request.PhoneNumber)
+	params.SetFrom(fromNumber)
+	params.SetContentSid(contentSid)
+	params.SetContentVariables(request.MessageVariables)
+
+	_, err := client.Api.CreateMessage(params)
+	if err != nil {
+		log.Printf("Error al enviar el mensaje: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo enviar el mensaje"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Mensaje enviado correctamente"})
+}
+
 func main() {
 	loadEnv()
 
@@ -135,5 +175,6 @@ func main() {
 	r.POST("/notification-medication", sendWhatsAppMessage)
 	r.POST("/notification-approved", sendNotificationApproved)
 	r.POST("/general-message", generalMessage)
+	r.POST("/osplad-confirmacion", ospladConfirmacion)
 	r.Run(":8081")
 }
